@@ -1,6 +1,7 @@
 plugins {
     id 'java'
     id 'groovy'
+    id 'org.cadixdev.licenser' version '0.6.1'
 }
 
 group = 'net.minecraftforge'
@@ -8,6 +9,12 @@ archivesBaseName = 'groovydslimprover'
 
 repositories {
     mavenCentral()
+}
+
+license {
+    header = file('LICENSE-header')
+    include '**/*.java'
+    include '**/*.groovy'
 }
 
 dependencies {
