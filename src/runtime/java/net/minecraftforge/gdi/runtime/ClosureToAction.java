@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: LGPL-2.1-only
  */
 
-package net.minecraftforge.gdi.transformer;
+package net.minecraftforge.gdi.runtime;
 
 import groovy.lang.Closure;
 import org.gradle.api.Action;

@@ -7,6 +7,7 @@ package net.minecraftforge.gdi.transformer.property
 
 import groovy.transform.CompileStatic
 import groovyjarjarasm.asm.Opcodes
+import net.minecraftforge.gdi.runtime.EnumValueGetter
 import net.minecraftforge.gdi.transformer.DSLPropertyTransformer
 import net.minecraftforge.gdi.transformer.PropertyQuery
 import org.codehaus.groovy.ast.*
@@ -20,6 +21,7 @@ import org.gradle.api.provider.Property
 class DefaultPropertyHandler implements PropertyHandler, Opcodes {
     private static final ClassNode PROPERTY_TYPE = ClassHelper.make(Property)
     private static final ClassNode ENUM_TYPE = ClassHelper.make(Enum)
+    private static final ClassNode ENUM_VALUE_GETTER_TYPE = ClassHelper.make(EnumValueGetter)
 
     @Override
     boolean handle(MethodNode methodNode, AnnotationNode annotation, String propertyName, DSLPropertyTransformer.Utils utils) {
@@ -112,7 +114,7 @@ class DefaultPropertyHandler implements PropertyHandler, Opcodes {
                     code: GeneralUtils.stmt(GeneralUtils.callX(
                             GeneralUtils.callThisX(methodNode.name),
                             'set',
-                            GeneralUtils.callX(type, 'valueOf', GeneralUtils.localVarX(propertyName, ClassHelper.STRING_TYPE))
+                            GeneralUtils.callX(ENUM_VALUE_GETTER_TYPE, 'get', GeneralUtils.args(GeneralUtils.classX(type), GeneralUtils.localVarX(propertyName, ClassHelper.STRING_TYPE)))
                     ))
             )
         }

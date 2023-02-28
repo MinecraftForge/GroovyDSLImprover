@@ -7,8 +7,8 @@ package net.minecraftforge.gdi.transformer
 
 import groovy.transform.CompileStatic
 import groovyjarjarasm.asm.Opcodes
+import net.minecraftforge.gdi.runtime.ClosureToAction
 import org.codehaus.groovy.ast.*
-import org.codehaus.groovy.ast.expr.ClosureExpression
 import org.codehaus.groovy.ast.expr.Expression
 import org.codehaus.groovy.ast.expr.VariableExpression
 import org.codehaus.groovy.ast.tools.GeneralUtils
@@ -19,7 +19,6 @@ import org.codehaus.groovy.transform.GroovyASTTransformation
 import org.codehaus.groovy.transform.sc.StaticCompileTransformation
 import org.gradle.api.Action
 
-import java.util.function.Consumer
 import java.util.stream.Stream
 
 @CompileStatic
@@ -60,14 +59,6 @@ class ClosureEquivalentTransformer extends AbstractASTTransformation implements 
     }
 
     static Expression asAction(Expression closure) {
-//        final it = GeneralUtils.param(ClassHelper.OBJECT_TYPE, 'it')
-//        final clos = GeneralUtils.closureX(new Parameter[] {it}, GeneralUtils.block(
-//                GeneralUtils.stmt(GeneralUtils.callX(closure, 'setDelegate', GeneralUtils.varX(it))),
-//                GeneralUtils.stmt(GeneralUtils.callX(closure, 'setResolveStrategy', GeneralUtils.constX(Closure.DELEGATE_FIRST))),
-//                GeneralUtils.stmt(GeneralUtils.callX(closure, 'call', GeneralUtils.varX(it)))
-//        ))
-//        expr.accept(clos)
-//        GeneralUtils.castX(ACTION, clos)
         GeneralUtils.callX(CLOSURE_TO_ACTION, 'delegateAndCall', closure)
     }
 }
