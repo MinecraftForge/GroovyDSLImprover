@@ -16,7 +16,7 @@ java {
 }
 
 changelog {
-    fromCommit '2cdc12082973b34379e2ca6f78d28d760b9e11e7'
+    fromTag '1.0'
 }
 
 sourceSets {
