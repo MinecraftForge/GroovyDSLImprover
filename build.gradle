@@ -41,4 +41,9 @@ test {
     useJUnitPlatform()
 }
 
+tasks.withType(GroovyCompile).configureEach {
+    options.incremental = true
+    groovyOptions.optimizationOptions.indy = true
+}
+
 java.toolchain.languageVersion = JavaLanguageVersion.of(8)
