@@ -114,6 +114,12 @@ import java.lang.annotation.*
 @interface DSLProperty {
     String propertyName() default ''
 
+    /**
+     * The singular name of the property, used by map or collection methods adding a single element. <br>
+     * If not specified it will be computed from the {@link #propertyName()} using {@link net.minecraftforge.gdi.transformer.Unpluralizer#unpluralize(java.lang.String)}.
+     */
+    String singularName() default ''
+
     Class<Closure> factory() default Closure.class
 
     boolean isConfigurable() default true
