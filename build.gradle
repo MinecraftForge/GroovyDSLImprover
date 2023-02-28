@@ -1,11 +1,19 @@
 plugins {
     id 'java'
     id 'groovy'
+    id 'maven-publish'
     id 'org.cadixdev.licenser' version '0.6.1'
+    id 'net.minecraftforge.gradleutils' version '2.+'
 }
 
 group = 'net.minecraftforge'
+version = gradleutils.getTagOffsetVersion()
 archivesBaseName = 'groovydslimprover'
+java.toolchain.languageVersion = JavaLanguageVersion.of(8)
+
+changelog {
+    fromCommit '2cdc12082973b34379e2ca6f78d28d760b9e11e7'
+}
 
 repositories {
     mavenCentral()
@@ -31,4 +39,41 @@ test {
     useJUnitPlatform()
 }
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(8)
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact jar
+            pom {
+                name = 'GroovyDSLImprover'
+                description = 'Groovy Compiler Plugin to improve building Groovy based DSLs, like those used in Gradle.'
+                url = 'https://github.com/MinecraftForge/GroovyDSLImprover'
+                scm {
+                    url = 'https://github.com/MinecraftForge/GroovyDSLImprover'
+                    connection = 'scm:git:git://github.com/MinecraftForge/GroovyDSLImprover.git'
+                    developerConnection = 'scm:git:git@github.com:MinecraftForge/GroovyDSLImprover.git'
+                }
+                issueManagement {
+                    system = 'github'
+                    url = 'https://github.com/MinecraftForge/GroovyDSLImprover/issues'
+                }
+
+                licenses {
+                    license {
+                        name = 'LGPLv2.1'
+                        url = 'https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = 'matyrobbrt'
+                        name = 'matyrobbrt'
+                    }
+                }
+            }
+        }
+    }
+    repositories {
+        maven gradleutils.getPublishingForgeMaven()
+    }
+}
