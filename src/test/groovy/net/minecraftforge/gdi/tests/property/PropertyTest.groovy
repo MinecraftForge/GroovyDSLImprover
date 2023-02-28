@@ -11,6 +11,7 @@ import org.codehaus.groovy.ast.ClassNode
 import org.codehaus.groovy.ast.MethodNode
 import org.codehaus.groovy.ast.Parameter
 import org.codehaus.groovy.ast.tools.GeneralUtils
+import org.gradle.api.Action
 import org.gradle.api.Project
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.jupiter.api.BeforeAll
@@ -35,7 +36,7 @@ class PropertyTest {
                 .withName("DummyTestingProject")
                 .build()
 
-        owner = project.getObjects().newInstance(PropertyOwnerImpl.class)
+        owner = project.getObjects().newInstance(PropertyOwnerImpl.class, project.objects)
         node = ClassHelper.make(PropertyOwner)
     }
 
@@ -55,6 +56,66 @@ class PropertyTest {
         // Methods for wrapper types generate primitive DSL methods
         assertNotNull(getMethod('existing', boolean))
         assertNotNull(getMethod('setExisting', boolean))
+    }
+
+    @Test
+    void "NDOC with configurable type generates methods"() {
+        owner.invokeMethod('configurableObject', ['clos', {
+            string = 'yes'
+            bool = false
+        }].toArray())
+        owner.invokeMethod('configurableObject', ['act', {
+            it.string = 'no'
+            it.bool = true
+        } as Action<ConfigurableObject>].toArray())
+
+        assert owner.configurableObjects.getByName('clos').string.get() == 'yes'
+        assert owner.configurableObjects.getByName('act').bool.get() == true
+
+        assertNotNull(getMethod('configurableObject', String, Action))
+        assertNotNull(getMethod('configurableObject', String, Closure))
+    }
+
+    @Test
+    void "collection properties generate methods"() {
+        owner.invokeMethod('integer', 13)
+        assertEquals(owner.integers.get(), [13])
+        assertNotNull(getMethod('integer', Integer))
+
+        owner.invokeMethod('configurableListed', owner.factory.newInstance(ConfigurableObject, 'dummy').tap {
+            it.string = 'Hello!'
+        })
+        assert owner.configurableListed.get().size() == 1 && owner.configurableListed.get()[0].string.get() == 'Hello!'
+        assertNotNull(getMethod('configurableListed', ConfigurableObject))
+
+        owner.invokeMethod('configurableListed', {
+            bool = true
+        })
+        assert owner.configurableListed.get().size() == 2 && owner.configurableListed.get()[1].bool.get() == true
+        assertNotNull(getMethod('configurableListed', Closure))
+        assertNotNull(getMethod('configurableListed', Action))
+
+        owner.invokeMethod('configurableListed', [owner.factory.newInstance(ConfigurableObject, 'dummy'), {
+            it.string = 'mhhm'
+        } as Action<ConfigurableObject>].toArray())
+        assert owner.configurableListed.get().size() == 3 && owner.configurableListed.get()[2].string.get() == 'mhhm'
+        assertNotNull(getMethod('configurableListed', ConfigurableObject, Closure))
+        assertNotNull(getMethod('configurableListed', ConfigurableObject, Action))
+    }
+    
+    @Test
+    void "enum string variants are generated"() {
+        owner.invokeMethod('enumValue', 'maybe')
+        assertEquals(owner.enumValue.get(), TestEnum.MAYBE)
+        assertNotNull(getMethod('enumValue', String))
+        assertNotNull(getMethod('enumValue', TestEnum))
+    }
+
+    @Test
+    void "Map properties generate methods"() {
+        owner.invokeMethod('mapEntry', ['key1', 'value1'].toArray())
+        assertEquals(owner.map.get(), [key1: 'value1'])
+        assertNotNull(getMethod('mapEntry', String, String))
     }
 
     private static MethodNode getMethod(String name, Class... parameters) {

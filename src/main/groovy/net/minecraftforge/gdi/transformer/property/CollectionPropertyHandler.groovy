@@ -8,7 +8,6 @@ package net.minecraftforge.gdi.transformer.property
 import groovy.transform.CompileStatic
 import groovyjarjarasm.asm.Opcodes
 import net.minecraftforge.gdi.transformer.DSLPropertyTransformer
-import net.minecraftforge.gdi.transformer.Unpluralizer
 import org.codehaus.groovy.ast.*
 import org.codehaus.groovy.ast.tools.GeneralUtils
 import org.codehaus.groovy.ast.tools.GenericsUtils
@@ -18,6 +17,9 @@ import org.gradle.api.provider.HasMultipleValues
 import java.util.stream.Collectors
 import java.util.stream.Stream
 
+/**
+ * Handles properties of type {@link HasMultipleValues}.
+ */
 @CompileStatic
 class CollectionPropertyHandler implements PropertyHandler, Opcodes {
     private final Set<ClassNode> colTypes
@@ -38,7 +40,7 @@ class CollectionPropertyHandler implements PropertyHandler, Opcodes {
     }
 
     boolean handleInternal(MethodNode methodNode, AnnotationNode annotation, String propertyName, DSLPropertyTransformer.Utils utils) {
-        final singularName = Unpluralizer.unpluralize(propertyName)
+        final singularName = utils.getSingularPropertyName(propertyName, annotation)
         final type = methodNode.returnType.genericsTypes[0].type
         utils.visitPropertyType(type, annotation)
         final factoryMethod = utils.factory(type, annotation, singularName)

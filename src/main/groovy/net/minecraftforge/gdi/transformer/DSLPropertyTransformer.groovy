@@ -211,6 +211,11 @@ class DSLPropertyTransformer extends AbstractASTTransformation {
             }
         }
 
+        String getSingularPropertyName(String plural, AnnotationNode annotation) {
+            if (annotation.members.containsKey('singularName')) return getMemberStringValue(annotation, 'singularName')
+            return Unpluralizer.unpluralize(plural)
+        }
+
         abstract boolean getBoolean(AnnotationNode annotation, String name, boolean defaultValue = true)
         abstract void addError(String message, ASTNode node)
     }

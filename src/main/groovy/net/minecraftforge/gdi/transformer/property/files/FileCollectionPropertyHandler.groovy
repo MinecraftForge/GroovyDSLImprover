@@ -8,7 +8,6 @@ package net.minecraftforge.gdi.transformer.property.files
 import groovy.transform.CompileStatic
 import groovyjarjarasm.asm.Opcodes
 import net.minecraftforge.gdi.transformer.DSLPropertyTransformer
-import net.minecraftforge.gdi.transformer.Unpluralizer
 import net.minecraftforge.gdi.transformer.property.PropertyHandler
 import org.codehaus.groovy.ast.*
 import org.codehaus.groovy.ast.tools.GeneralUtils
@@ -21,7 +20,7 @@ class FileCollectionPropertyHandler implements PropertyHandler, Opcodes {
     @Override
     boolean handle(MethodNode methodNode, AnnotationNode annotation, String propertyName, DSLPropertyTransformer.Utils utils) {
         if (!GeneralUtils.isOrImplements(methodNode.returnType, TYPE)) return false
-        final singularName = Unpluralizer.unpluralize(propertyName)
+        final singularName = utils.getSingularPropertyName(propertyName, annotation)
 
         final objArray = ClassHelper.OBJECT_TYPE.makeArray()
         utils.createAndAddMethod(

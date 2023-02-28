@@ -11,7 +11,7 @@ import org.codehaus.groovy.ast.AnnotationNode
 import org.codehaus.groovy.ast.MethodNode
 
 /**
- * Interface used to handle implementing {@link net.minecraftforge.gradle.dsl.annotations.DSLProperty} methods.
+ * Interface used to handle implementing {@link net.minecraftforge.gdi.annotations.DSLProperty} methods.
  * @see DSLPropertyTransformer#HANDLERS
  */
 @CompileStatic
