@@ -17,6 +17,9 @@ import org.gradle.api.provider.HasMultipleValues
 import java.util.stream.Collectors
 import java.util.stream.Stream
 
+/**
+ * Handles properties of type {@link HasMultipleValues}.
+ */
 @CompileStatic
 class CollectionPropertyHandler implements PropertyHandler, Opcodes {
     private final Set<ClassNode> colTypes

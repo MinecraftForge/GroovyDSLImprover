@@ -17,7 +17,6 @@ public class EnumValueGetter {
             }
         }
 
-        throw new IllegalArgumentException(
-                "No enum constant " + enumClass.getCanonicalName() + "." + name);
+        throw new IllegalArgumentException("No enum constant " + enumClass.getCanonicalName() + "." + name);
     }
 }
