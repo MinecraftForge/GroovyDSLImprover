@@ -72,6 +72,14 @@ class MapPropertyHandler implements PropertyHandler, Opcodes {
                 codeExpr: [GeneralUtils.callX(GeneralUtils.callThisX(methodNode.name), 'put', GeneralUtils.args(GeneralUtils.localVarX('key', keyType), GeneralUtils.localVarX('val', valueType)))]
         )
 
+        final mapType = GenericsUtils.makeClassSafeWithGenerics(ClassHelper.MAP_TYPE, new GenericsType(keyType), new GenericsType(valueType))
+        utils.createAndAddMethod(
+                methodName: propertyName,
+                modifiers: ACC_PUBLIC,
+                parameters: [new Parameter(mapType, 'map')],
+                codeExpr: [GeneralUtils.callX(GeneralUtils.callThisX(methodNode.name), 'putAll', GeneralUtils.args(GeneralUtils.localVarX('map', mapType)))]
+        )
+
         return true
     }
 }

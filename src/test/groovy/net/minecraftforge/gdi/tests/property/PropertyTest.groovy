@@ -116,6 +116,10 @@ class PropertyTest {
         owner.invokeMethod('mapEntry', ['key1', 'value1'].toArray())
         assertEquals(owner.map.get(), [key1: 'value1'])
         assertNotNull(getMethod('mapEntry', String, String))
+
+        owner.invokeMethod('map', ['hello world': 'sup?'])
+        assertEquals(owner.map.get(), [key1: 'value1', 'hello world': 'sup?'])
+        assertNotNull(getMethod('map', Map))
     }
 
     private static MethodNode getMethod(String name, Class... parameters) {

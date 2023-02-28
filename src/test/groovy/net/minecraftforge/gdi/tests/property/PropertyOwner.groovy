@@ -35,7 +35,7 @@ interface PropertyOwner {
     @DSLProperty
     Property<TestEnum> getEnumValue()
 
-    @DSLProperty(propertyName = 'mapEntry')
+    @DSLProperty(singularName = 'mapEntry')
     MapProperty<String, String> getMap()
 
     @Inject

@@ -59,6 +59,7 @@ import java.lang.annotation.*
  *                  <li>{@code $singularName(K, V)} - the given value will be added to the map, at the given key</li>
  *                  <li>{@code $singularName(K, V, Action<V>)} - the action will be executed on the given value, which will be then added to the map at the given key</li>
  *                  <li>{@code $singularName(K, V, @DelegatesTo(V.class) Closure<V>)} - same behaviour as the action</li>
+ *                  <li>{@code $propertyName(Map<K, V>)} - calls {@link MapProperty#putAll(java.util.Map)}</li>
  *              </ul>
  *              The methods below are generated <i>only</i> if a {@linkplain DSLProperty#factory() factory} is supplied:
  *              <ul>
