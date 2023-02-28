@@ -9,7 +9,11 @@ plugins {
 group = 'net.minecraftforge'
 version = gradleutils.getTagOffsetVersion()
 archivesBaseName = 'groovydslimprover'
-java.toolchain.languageVersion = JavaLanguageVersion.of(8)
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(8)
+    withSourcesJar()
+}
 
 changelog {
     fromCommit '2cdc12082973b34379e2ca6f78d28d760b9e11e7'
@@ -43,6 +47,20 @@ dependencies {
 
 jar {
     from sourceSets.runtime.output
+    manifest.attributes([
+            'Specification-Title'   : 'GroovyDSLImprover',
+            'Specification-Vendor'  : 'MinecraftForge',
+            'Implementation-Title'  : project.name,
+            'Implementation-Version': project.version,
+            'Implementation-Vendor' : 'MinecraftForge',
+            'Git-Commit'            : gradleutils.gitInfo.abbreviatedId,
+            'Git-Branch'            : gradleutils.gitInfo.branch,
+            'Build-Number'          : "${System.getenv('BUILD_NUMBER') ?: 0}"
+    ])
+}
+
+sourcesJar {
+    from sourceSets.runtime.allSource
 }
 
 tasks.withType(GroovyCompile).configureEach {
@@ -57,7 +75,9 @@ test {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifact jar
+            from components.java
+            artifactId = 'groovydslimprover'
+
             pom {
                 name = 'GroovyDSLImprover'
                 description = 'Groovy Compiler Plugin to improve building Groovy based DSLs, like those used in Gradle.'
