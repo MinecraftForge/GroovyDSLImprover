@@ -1,11 +1,23 @@
 plugins {
     id 'java'
     id 'groovy'
+    id 'maven-publish'
     id 'org.cadixdev.licenser' version '0.6.1'
+    id 'net.minecraftforge.gradleutils' version '2.+'
 }
 
 group = 'net.minecraftforge'
+version = gradleutils.getTagOffsetVersion()
 archivesBaseName = 'groovydslimprover'
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(8)
+    withSourcesJar()
+}
+
+changelog {
+    fromCommit '2cdc12082973b34379e2ca6f78d28d760b9e11e7'
+}
 
 sourceSets {
     runtime
@@ -35,10 +47,20 @@ dependencies {
 
 jar {
     from sourceSets.runtime.output
+    manifest.attributes([
+            'Specification-Title'   : 'GroovyDSLImprover',
+            'Specification-Vendor'  : 'MinecraftForge',
+            'Implementation-Title'  : project.name,
+            'Implementation-Version': project.version,
+            'Implementation-Vendor' : 'MinecraftForge',
+            'Git-Commit'            : gradleutils.gitInfo.abbreviatedId,
+            'Git-Branch'            : gradleutils.gitInfo.branch,
+            'Build-Number'          : "${System.getenv('BUILD_NUMBER') ?: 0}"
+    ])
 }
 
-test {
-    useJUnitPlatform()
+sourcesJar {
+    from sourceSets.runtime.allSource
 }
 
 tasks.withType(GroovyCompile).configureEach {
@@ -46,4 +68,47 @@ tasks.withType(GroovyCompile).configureEach {
     groovyOptions.optimizationOptions.indy = true
 }
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(8)
+test {
+    useJUnitPlatform()
+}
+
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            from components.java
+            artifactId = 'groovydslimprover'
+
+            pom {
+                name = 'GroovyDSLImprover'
+                description = 'Groovy Compiler Plugin to improve building Groovy based DSLs, like those used in Gradle.'
+                url = 'https://github.com/MinecraftForge/GroovyDSLImprover'
+                scm {
+                    url = 'https://github.com/MinecraftForge/GroovyDSLImprover'
+                    connection = 'scm:git:git://github.com/MinecraftForge/GroovyDSLImprover.git'
+                    developerConnection = 'scm:git:git@github.com:MinecraftForge/GroovyDSLImprover.git'
+                }
+                issueManagement {
+                    system = 'github'
+                    url = 'https://github.com/MinecraftForge/GroovyDSLImprover/issues'
+                }
+
+                licenses {
+                    license {
+                        name = 'LGPLv2.1'
+                        url = 'https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id = 'matyrobbrt'
+                        name = 'matyrobbrt'
+                    }
+                }
+            }
+        }
+    }
+    repositories {
+        maven gradleutils.getPublishingForgeMaven()
+    }
+}
