@@ -59,6 +59,7 @@ class PropertyTest {
     }
 
     @Test
+    @SuppressWarnings('ConfigurationAvoidance')
     void "NDOC with configurable type generates methods"() {
         owner.invokeMethod('configurableObject', ['clos', {
             string = 'yes'
@@ -74,6 +75,16 @@ class PropertyTest {
 
         assertNotNull(getMethod('configurableObject', String, Action))
         assertNotNull(getMethod('configurableObject', String, Closure))
+
+        owner.invokeMethod('configurableObjects', {
+            register('inClos') {
+                string = 'some String'
+            }
+        })
+
+        assert owner.configurableObjects.getByName('inClos').string.get() == 'some String'
+
+        assertNotNull(getMethod('configurableObjects', Closure))
     }
 
     @Test
@@ -120,6 +131,19 @@ class PropertyTest {
         owner.invokeMethod('map', ['hello world': 'sup?'])
         assertEquals(owner.map.get(), [key1: 'value1', 'hello world': 'sup?'])
         assertNotNull(getMethod('map', Map))
+    }
+
+    @Test
+    void "Property of configurable type generates methods"() {
+        owner.objectWhichCanBeConfigured.convention(owner.factory.newInstance(ConfigurableObject, 'dummy'))
+
+        owner.invokeMethod('objectWhichCanBeConfigured', {
+            string = 'hm, no'
+        })
+        assertEquals(owner.objectWhichCanBeConfigured.get().string.get(), 'hm, no')
+
+        assertNotNull(getMethod('objectWhichCanBeConfigured', Action))
+        assertNotNull(getMethod('objectWhichCanBeConfigured', Closure))
     }
 
     private static MethodNode getMethod(String name, Class... parameters) {

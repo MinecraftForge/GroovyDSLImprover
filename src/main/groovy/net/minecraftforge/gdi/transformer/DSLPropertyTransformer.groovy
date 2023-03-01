@@ -39,7 +39,7 @@ import java.util.stream.Stream
 class DSLPropertyTransformer extends AbstractASTTransformation {
     private static final ClassNode DELEGATES_TO_TYPE = ClassHelper.make(DelegatesTo)
     private static final ClassNode CLOSURE_PARAMS_TYPE = ClassHelper.make(ClosureParams)
-    private static final ClassNode CONFIGURABLE_TYPE = ClassHelper.make(Configurable)
+    public static final ClassNode CONFIGURABLE_TYPE = ClassHelper.make(Configurable)
 
     public static final ClassNode RAW_GENERIC_CLOSURE = GenericsUtils.makeClassSafe(Closure)
 
@@ -184,14 +184,26 @@ class DSLPropertyTransformer extends AbstractASTTransformation {
                         it.addMember('options', GeneralUtils.constX(type.unresolvedName))
                     })
                 } else {
-                    it.addAnnotation(new AnnotationNode(DELEGATES_TO_TYPE).tap {
-                        it.addMember('value', GeneralUtils.classX(type))
-                        it.addMember('strategy', GeneralUtils.constX(Closure.DELEGATE_FIRST))
-                    })
-                    it.addAnnotation(new AnnotationNode(CLOSURE_PARAMS_TYPE).tap {
-                        it.addMember('value', GeneralUtils.classX(SimpleType))
-                        it.addMember('options', GeneralUtils.constX(type.name.replace('$', '.')))
-                    })
+                    if (type.usingGenerics) {
+                        final String asString = typeToString(type)
+                        it.addAnnotation(new AnnotationNode(DELEGATES_TO_TYPE).tap {
+                            it.addMember('type', GeneralUtils.constX(asString))
+                            it.addMember('strategy', GeneralUtils.constX(Closure.DELEGATE_FIRST))
+                        })
+                        it.addAnnotation(new AnnotationNode(CLOSURE_PARAMS_TYPE).tap {
+                            it.addMember('value', GeneralUtils.classX(FromString))
+                            it.addMember('options', GeneralUtils.constX(asString))
+                        })
+                    } else {
+                        it.addAnnotation(new AnnotationNode(DELEGATES_TO_TYPE).tap {
+                            it.addMember('value', GeneralUtils.classX(type))
+                            it.addMember('strategy', GeneralUtils.constX(Closure.DELEGATE_FIRST))
+                        })
+                        it.addAnnotation(new AnnotationNode(CLOSURE_PARAMS_TYPE).tap {
+                            it.addMember('value', GeneralUtils.classX(SimpleType))
+                            it.addMember('options', GeneralUtils.constX(type.name.replace('$', '.')))
+                        })
+                    }
                 }
             }
         }
@@ -225,6 +237,16 @@ class DSLPropertyTransformer extends AbstractASTTransformation {
     static final class OverloadDelegationStrategy {
         final int paramIndex
         final Expression overload
+    }
+
+    @CompileDynamic
+    private static String typeToString(ClassNode type) {
+        if (type.usingGenerics) {
+            return type.name.replace('$', '.') + '<' + Arrays.stream(type.genericsTypes)
+                .map { typeToString(it.type) }.collect(Collectors.joining(',')) + '>'
+        } else {
+            return type.name.replace('$', '.')
+        }
     }
 }
 

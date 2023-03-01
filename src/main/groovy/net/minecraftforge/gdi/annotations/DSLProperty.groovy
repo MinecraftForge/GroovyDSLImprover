@@ -74,6 +74,7 @@ import java.lang.annotation.*
  *              <ul>
  *                  <li>{@code $singularName(String, Action<T>)} - calls {@link NamedDomainObjectContainer#register(java.lang.String, Action)}</li>
  *                  <li>{@code $singularName(K, @DelegatesTo(V.class) Closure<V>)} - calls {@link NamedDomainObjectContainer#register(java.lang.String, Action)}</li>
+ *                  <li>{@code $propertyName(@DelegatesTo(NamedDomainObjectContainer.class) Closure<V>)} - calls {@link NamedDomainObjectContainer#register(java.lang.String, Action)}</li>
  *              </ul>
  *          </th>
  *     </tr>

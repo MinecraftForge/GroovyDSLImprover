@@ -7,9 +7,8 @@ package net.minecraftforge.gdi.transformer
 
 import groovy.transform.CompileStatic
 import groovyjarjarasm.asm.Opcodes
+import groovyjarjarasm.asm.Type
 import org.codehaus.groovy.ast.*
-import org.codehaus.groovy.ast.expr.Expression
-import org.codehaus.groovy.ast.expr.VariableExpression
 import org.codehaus.groovy.ast.tools.GeneralUtils
 import org.codehaus.groovy.control.CompilePhase
 import org.codehaus.groovy.control.SourceUnit
@@ -17,7 +16,6 @@ import org.codehaus.groovy.transform.AbstractASTTransformation
 import org.codehaus.groovy.transform.GroovyASTTransformation
 import org.codehaus.groovy.transform.sc.StaticCompileTransformation
 
-import java.util.stream.Collectors
 import java.util.stream.Stream
 
 @CompileStatic
@@ -34,18 +32,39 @@ class BouncerMethodTransformer extends AbstractASTTransformation implements Opco
             clazz = ((InnerClassNode) clazz).outerClass
         }
 
-        // TODO - Use ASM to call the actual method
-        final Expression call = GeneralUtils.callX(method.declaringClass, method.name, GeneralUtils.args(
-                    Stream.of(method.parameters)
-                            .<Expression>map { it.name == '$self' ? VariableExpression.THIS_EXPRESSION : GeneralUtils.varX(it) }
-                        .collect(Collectors.toList())
-        ))
+        if (method.isVoidMethod()) {
+            addError('Cannot use @BouncerMethod on void methods!', method)
+            return
+        }
+
+        final bouncerType = getMemberClassValue((AnnotationNode)astNodes[0], 'returnType')
+        if ((bouncerType.isInterface() && !method.returnType.implementsInterface(bouncerType)) || (!bouncerType.isInterface() && !method.returnType.isDerivedFrom(bouncerType))) {
+            addError("Cannot use class $bouncerType as bouncer type as it is not a superclass of ${method.returnType}!", method)
+            return
+        }
+
+        final actualParams = Stream.of(method.parameters)
+                .filter { it.name != '$self' }
+                .toList()
 
         final mtd = new MethodNode(
-                method.name, ACC_BRIDGE | ACC_SYNTHETIC | ACC_PUBLIC,
-                getMemberClassValue((AnnotationNode)astNodes[0], 'returnType'),
-                method.parameters.drop(1), method.exceptions,
-                GeneralUtils.returnS(call)
+                method.name, ACC_BRIDGE | ACC_SYNTHETIC | ACC_PUBLIC, bouncerType,
+                actualParams.toArray() as Parameter[], method.exceptions,
+                GeneralUtils.returnS(GeneralUtils.bytecodeX {
+                    it.visitIntInsn(ALOAD, 0) // Load self
+                    final params = actualParams.stream()
+                            .map { TransformerUtils.getType(it.type) }
+                            .toList()
+                    for (int i = 0; i < params.size(); i++) {
+                        it.visitIntInsn(params[i].getOpcode(ILOAD), i + 1)
+                    }
+                    it.visitMethodInsn(INVOKEINTERFACE,
+                            TransformerUtils.getInternalName(clazz),
+                            method.name,
+                            Type.getMethodDescriptor(TransformerUtils.getType(method.returnType), params as Type[]),
+                            true
+                    )
+                })
         )
 
         clazz.addMethod(mtd)

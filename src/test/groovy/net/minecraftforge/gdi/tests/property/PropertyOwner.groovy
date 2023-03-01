@@ -33,6 +33,9 @@ interface PropertyOwner {
     NamedDomainObjectContainer<ConfigurableObject> getConfigurableObjects()
 
     @DSLProperty
+    Property<ConfigurableObject> getObjectWhichCanBeConfigured()
+
+    @DSLProperty
     Property<TestEnum> getEnumValue()
 
     @DSLProperty(singularName = 'mapEntry')

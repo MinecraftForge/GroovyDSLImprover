@@ -20,6 +20,7 @@ class NamedDomainObjectContainerHandler implements PropertyHandler, Opcodes {
     private static final ClassNode PROPERTY_TYPE = ClassHelper.make(NamedDomainObjectContainer)
 
     @Override
+    @SuppressWarnings('UnnecessaryQualifiedReference')
     boolean handle(MethodNode methodNode, AnnotationNode annotation, String propertyName, DSLPropertyTransformer.Utils utils) {
         if (!GeneralUtils.isOrImplements(methodNode.returnType, PROPERTY_TYPE)) return false
 
@@ -56,6 +57,16 @@ class NamedDomainObjectContainerHandler implements PropertyHandler, Opcodes {
                                 ClosureEquivalentTransformer.asAction(GeneralUtils.localVarX('closure', DSLPropertyTransformer.RAW_GENERIC_CLOSURE))
                         )
                 )))
+        )
+
+        utils.createAndAddMethod(
+                methodName: propertyName,
+                modifiers: ACC_PUBLIC,
+                parameters: [utils.closureParam(methodNode.returnType)],
+                code: GeneralUtils.stmt(GeneralUtils.callX(
+                        GeneralUtils.callThisX(methodNode.name),
+                        'configure', GeneralUtils.localVarX('closure', DSLPropertyTransformer.RAW_GENERIC_CLOSURE)
+                ))
         )
 
         return true
