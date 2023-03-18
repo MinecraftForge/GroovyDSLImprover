@@ -6,8 +6,6 @@
 package net.minecraftforge.gdi
 
 import groovy.transform.CompileStatic
-import net.minecraftforge.gdi.util.ConfigurableDSLElement
-import net.minecraftforge.gdi.util.ProjectAssociatedDSLElement
 
 /**
  * Defines a DSL object which is configurable and part of a project structure.

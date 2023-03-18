@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: LGPL-2.1-only
  */
 
-package net.minecraftforge.gdi.util
+package net.minecraftforge.gdi
 
 import groovy.transform.PackageScope
 import org.gradle.util.internal.ConfigureUtil

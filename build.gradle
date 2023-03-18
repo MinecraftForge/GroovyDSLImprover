@@ -10,17 +10,31 @@ group = 'net.minecraftforge'
 version = gradleutils.getTagOffsetVersion()
 archivesBaseName = 'groovydslimprover'
 
+sourceSets {
+    runtime {}
+    base {}
+}
+
 java {
     toolchain.languageVersion = JavaLanguageVersion.of(8)
+    withJavadocJar()
     withSourcesJar()
+
+    registerFeature('runtime') {
+        usingSourceSet(sourceSets.runtime)
+        withJavadocJar()
+        withSourcesJar()
+    }
+
+    registerFeature('base') {
+        usingSourceSet(sourceSets.base)
+        withJavadocJar()
+        withSourcesJar()
+    }
 }
 
 changelog {
     fromTag '1.0'
-}
-
-sourceSets {
-    runtime
 }
 
 repositories {
@@ -36,7 +50,13 @@ license {
 dependencies {
     implementation sourceSets.runtime.output
     implementation gradleApi()
+
     runtimeImplementation gradleApi()
+
+    baseImplementation gradleApi()
+    baseImplementation sourceSets.runtime.output
+    baseImplementation sourceSets.main.output
+
     compileOnly 'org.jetbrains:annotations:24.0.0'
 
     testImplementation 'org.mockito:mockito-core:4.11.0'
@@ -45,8 +65,7 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-engine:5.9.2'
 }
 
-jar {
-    from sourceSets.runtime.output
+tasks.withType(Jar).configureEach {
     manifest.attributes([
             'Specification-Title'   : 'GroovyDSLImprover',
             'Specification-Vendor'  : 'MinecraftForge',
@@ -57,10 +76,6 @@ jar {
             'Git-Branch'            : gradleutils.gitInfo.branch,
             'Build-Number'          : "${System.getenv('BUILD_NUMBER') ?: 0}"
     ])
-}
-
-sourcesJar {
-    from sourceSets.runtime.allSource
 }
 
 tasks.withType(GroovyCompile).configureEach {
